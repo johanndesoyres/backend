@@ -27,65 +27,67 @@ defmodule Main do
     :ok = File.write(output_name, Poison.encode!(content), [:binary])
   end
 
-  def is_monday?(date) do
-    1 == Date.day_of_week(date)
-  end
+  def is_saturday?(date), do: 6 == Date.day_of_week(date)
 
-  def is_saturday?(date) do
-    6 == Date.day_of_week(date)
-  end
+  def is_sunday?(date), do: 7 == Date.day_of_week(date)
 
-  def postpon_for_monday(shipping_date, expected_delivery_date, range_size) do
-    Date.range(shipping_date, expected_delivery_date)
-    |> Enum.take(range_size)
-    |> Enum.reduce(0, fn date, acc ->
-      if is_monday?(date), do: acc + 1, else: acc
-    end)
-  end
-
-  def postpon_for_saturday(
-        _shipping_date,
-        _expected_delivery_date,
-        _range_size,
-        true
-      ) do
-    0
-  end
-
-  def postpon_for_saturday(
-        shipping_date,
+  def postpon(
         expected_delivery_date,
-        range_size,
-        _saturday_deliveries
+        0,
+        saturday_deliveries
       ) do
-    Date.range(shipping_date, expected_delivery_date)
-    |> Enum.take(range_size)
-    |> Enum.reduce(0, fn date, acc ->
-      if is_saturday?(date), do: acc + 1, else: acc
-    end)
+    cond do
+      is_saturday?(expected_delivery_date) && !saturday_deliveries ->
+        postpon(
+          Date.add(expected_delivery_date, 1),
+          0,
+          saturday_deliveries
+        )
+
+      is_sunday?(expected_delivery_date) ->
+        postpon(
+          Date.add(expected_delivery_date, 1),
+          0,
+          saturday_deliveries
+        )
+
+      true ->
+        expected_delivery_date
+    end
+  end
+
+  def postpon(
+        expected_delivery_date,
+        delivery_promise,
+        saturday_deliveries
+      ) do
+    delivery_promise =
+      cond do
+        is_saturday?(expected_delivery_date) && !saturday_deliveries ->
+          delivery_promise
+
+        is_sunday?(expected_delivery_date) ->
+          delivery_promise
+
+        true ->
+          delivery_promise - 1
+      end
+
+    postpon(
+      Date.add(expected_delivery_date, 1),
+      delivery_promise,
+      saturday_deliveries
+    )
   end
 
   def expected_delivery_date(package, carrier_data) do
     delivery_promise = get_in(carrier_data, [package.carrier, :delivery_promise])
     saturday_deliveries = get_in(carrier_data, [package.carrier, :saturday_deliveries])
-    shipping_date = Date.from_iso8601!(package.shipping_date)
 
-    expected_delivery_date =
-      shipping_date
-      |> Date.add(delivery_promise + 1)
-
-    range_size = Date.diff(expected_delivery_date, shipping_date)
-
-    expected_delivery_date
-    |> Date.add(postpon_for_monday(shipping_date, expected_delivery_date, range_size))
-    |> Date.add(
-      postpon_for_saturday(
-        shipping_date,
-        expected_delivery_date,
-        range_size,
-        saturday_deliveries
-      )
-    )
+    package.shipping_date
+    |> Date.from_iso8601!()
+    |> Date.add(1)
+    |> postpon(delivery_promise, saturday_deliveries)
     |> Date.to_string()
   end
 
