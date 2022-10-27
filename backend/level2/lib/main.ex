@@ -1,21 +1,22 @@
 defmodule Main do
   @doc """
-  Parser for the input json file.
+  Reader for the input json file.
 
   ## Examples
 
-      iex> Main.parser("data/input.json")
-      %{
-        "carriers" => [
-          %{"code" => "colissimo", "delivery_promise" => 3},
-          %{"code" => "ups", "delivery_promise" => 2}
+      iex> Main.read_file("data/input.json")
+     {:ok,
+        %{
+        carriers: [
+          %{code: "colissimo", delivery_promise: 3},
+          %{code: "ups", delivery_promise: 2}
         ],
-        "packages" => [
-          %{"carrier" => "colissimo", "id" => 1, "shipping_date" => "2018-05-01"},
-          %{"carrier" => "ups", "id" => 2, "shipping_date" => "2018-05-14"},
-          %{"carrier" => "colissimo", "id" => 3, "shipping_date" => "2018-06-10"}
+        packages: [
+          %{carrier: "colissimo", id: 1, shipping_date: "2018-05-01"},
+          %{carrier: "ups", id: 2, shipping_date: "2018-05-14"},
+          %{carrier: "colissimo", id: 3, shipping_date: "2018-06-10"}
         ]
-      }
+      }}
   """
   def read_file(input_name) do
     input_name
@@ -23,29 +24,53 @@ defmodule Main do
     |> Poison.decode(keys: :atoms)
   end
 
+  @doc """
+  Writer for the output file.
+
+  ## Examples
+
+      iex> Main.write_file("data/input.json")
+     :ok
+  """
   def write_file(content, output_name) do
     :ok = File.write(output_name, Poison.encode!(content), [:binary])
   end
 
+  @doc """
+  Checked if the provided date is on saturday.
+
+  ## Examples
+
+      iex> Main.is_saturday?(~D[2018-05-01])
+      false
+  """
   def is_saturday?(date), do: 6 == Date.day_of_week(date)
 
+  @doc """
+  Checked if the provided date is on sunday.
+
+  ## Examples
+
+      iex> Main.is_sunday?(~D[2018-05-01])
+      false
+  """
   def is_sunday?(date), do: 7 == Date.day_of_week(date)
 
-  def postpon(
+  def postpone(
         expected_delivery_date,
         0,
         saturday_deliveries
       ) do
     cond do
       is_saturday?(expected_delivery_date) && !saturday_deliveries ->
-        postpon(
+        postpone(
           Date.add(expected_delivery_date, 1),
           0,
           saturday_deliveries
         )
 
       is_sunday?(expected_delivery_date) ->
-        postpon(
+        postpone(
           Date.add(expected_delivery_date, 1),
           0,
           saturday_deliveries
@@ -56,7 +81,15 @@ defmodule Main do
     end
   end
 
-  def postpon(
+  @doc """
+  Postpone the delivery date if needed (accordingly to the rules provided in the readme.
+  This function is recursive. The delivery promise is the number of calls.
+  The logic here is to increment the delivery date during each call of the function.
+  If the current delivery date falls on a Saturday or Sunday then an additional recursive
+  call is made if necessary. We return the final delivery date when the number of calls is 0 and
+  the current date is neither Saturday nor Sunday.
+  """
+  def postpone(
         expected_delivery_date,
         delivery_promise,
         saturday_deliveries
@@ -73,13 +106,16 @@ defmodule Main do
           delivery_promise - 1
       end
 
-    postpon(
+    postpone(
       Date.add(expected_delivery_date, 1),
       delivery_promise,
       saturday_deliveries
     )
   end
 
+  @doc """
+  Compute the expected delivery date for a specific package.
+  """
   def expected_delivery_date(package, carrier_data) do
     delivery_promise = get_in(carrier_data, [package.carrier, :delivery_promise])
     saturday_deliveries = get_in(carrier_data, [package.carrier, :saturday_deliveries])
@@ -87,10 +123,14 @@ defmodule Main do
     package.shipping_date
     |> Date.from_iso8601!()
     |> Date.add(1)
-    |> postpon(delivery_promise, saturday_deliveries)
+    |> postpone(delivery_promise, saturday_deliveries)
     |> Date.to_string()
   end
 
+  @doc """
+  Compute the expected delivery dates for all packages from the input json
+  file and write the result in the output json file.
+  """
   def compute_expected_delivery_dates do
     {:ok, content} = read_file("data/input.json")
 
@@ -119,6 +159,7 @@ defmodule Main do
           | acc
         ]
       end)
+      |> Enum.reverse()
 
     :ok = write_file(%{deliveries: expected_delivery_dates}, "data/output.json")
   end
