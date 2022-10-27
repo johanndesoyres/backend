@@ -1,0 +1,45 @@
+{
+  "carriers": [
+    { 
+      "code": "colissimo",
+      "delivery_promise": 3,
+      "saturday_deliveries": false,
+      "oversea_delay_threshold": 3000
+    },
+    {
+      "code": "ups",
+      "delivery_promise": 2,
+      "saturday_deliveries": true,
+      "oversea_delay_threshold": 5000
+    }
+  ],
+  "packages": [
+    {
+      "id": 1,
+      "carrier": "colissimo",
+      "shipping_date": "2018-05-02",
+      "origin_country": "FR",
+      "destination_country": "JP"
+    },
+    {
+      "id": 2,
+      "carrier": "ups",
+      "shipping_date": "2018-05-10",
+      "origin_country": "DK",
+      "destination_country": "US"
+    },
+    {
+      "id": 3,
+      "carrier": "colissimo",
+      "shipping_date": "2018-06-11",
+      "origin_country": "FR",
+      "destination_country": "DK"
+    }
+  ],
+  "country_distance": {
+    "FR": { "US": 6000, "DK": 1000, "JP": 9500 },
+    "US": { "FR": 6000, "DK": 5500, "JP": 11000 },
+    "DK": { "US": 5500, "FR": 1000, "JP": 8500 },
+    "JP": { "US": 11000, "DK": 8500, "FR": 9500 }
+  }
+}

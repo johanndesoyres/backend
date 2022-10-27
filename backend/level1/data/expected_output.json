@@ -1,0 +1,16 @@
+{
+  "deliveries": [
+    {
+      "package_id": 1,
+      "expected_delivery": "2018-05-05"
+    },
+    {
+      "package_id": 2,
+      "expected_delivery": "2018-05-17"
+    },
+    {
+      "package_id": 3,
+      "expected_delivery": "2018-06-14"
+    }
+  ]
+}

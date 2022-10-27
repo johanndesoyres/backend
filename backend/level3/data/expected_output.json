@@ -1,0 +1,19 @@
+{
+  "deliveries": [
+    {
+      "package_id": 1,
+      "expected_delivery": "2018-05-11",
+      "oversea_delay": 3
+    },
+    {
+      "package_id": 2,
+      "expected_delivery": "2018-05-15",
+      "oversea_delay": 1
+    },
+    {
+      "package_id": 3,
+      "expected_delivery": "2018-06-15",
+      "oversea_delay": 0
+    }
+  ]
+}

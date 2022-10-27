@@ -1,0 +1,11 @@
+{
+  "carriers": [
+    { "code": "colissimo", "delivery_promise": 3, "saturday_deliveries": false },
+    { "code": "ups", "delivery_promise": 2, "saturday_deliveries": true }
+  ],
+  "packages": [
+    { "id": 1, "carrier": "colissimo", "shipping_date": "2018-05-02" },
+    { "id": 2, "carrier": "ups", "shipping_date": "2018-05-10" },
+    { "id": 3, "carrier": "colissimo", "shipping_date": "2018-06-11" }
+  ]
+}
