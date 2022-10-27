@@ -13,5 +13,7 @@ We first want to compute a list of expected delivery dates for some packages.
 
 If you want to run the code just run the following command in the current directory :
 
+```
 $ iex -S mix
 iex> Main.compute_expected_delivery_dates
+```

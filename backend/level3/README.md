@@ -17,5 +17,7 @@ _This is the final level, now would be a good time to tidy up your code and do a
 
 If you want to run the code just run the following command in the current directory :
 
+```
 $ iex -S mix
 iex> Main.compute_expected_delivery_dates
+```
